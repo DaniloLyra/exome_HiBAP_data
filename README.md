@@ -15,25 +15,25 @@ We provided the exome-capture data set as well as the R scripts used in this stu
 
 ## Table of contents
 1. **Variant filtering (quality control) - Synbreed R**
-     - [html output](http://htmlpreview.github.io/? https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/variant_filtering/Variant-filtering.html)
+     - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/variant_filtering/Variant-filtering.html)
 
 2. **Inference of population structure and genetic differentiation - PLINK / SNPRelate R**
-     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/PS/Diversity-analysis.html?token=ACXKHZ2I37SECW6K35XALTK6WV5BE)
+     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/PS/Diversity-analysis.html)
 
 3. **Single point scan - GAPIT R**
-     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/single-scan/Single-variant-analysis.html?token=ACXKHZ7EAUHB267OHKL4POS6WVXZY)
+     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/single-scan/Single-variant-analysis.html)
 
 4. **Gene-based association analysis - FREGAT R**
-     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/gene-mapping/Gene-based-analysis.html?token=ACXKHZ2I37SECW6K35XALTK6WV5BE)
+     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/gene-mapping/Gene-based-analysis.html)
 
 5. **Screening for signature of selection at the gene level - dndscv R**
-     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/signature-selection/Signature-selection.html?token=ACXKHZ5476ELAJ57AQK5R5S6WVZJW)
+     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/signature-selection/Signature-selection.html)
 
 6. **Partitioning the genic heritability - GCTA software**
-     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/gene-heritability/Regional_Gene_heritability.html?token=ACXKHZ7TQS22EXEHLQG2TMS6WV3KY)
+     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/gene-heritability/Regional_Gene_heritability.html)
 
 7. **Gene-based prediction (genic kernels) - BGLR R**
-     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/genomic-prediction/Genomic-prediction.html?token=ACXKHZZ3QJOD2VS6DBY7PNC6WV4KA)
+     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/genomic-prediction/Genomic-prediction.html)
 
 ## Funding
 Rothamsted Research receives strategic funding from the Biotechnological and Biological Sciences Research Council of the UK. We acknowledge International Wheat Yield Partnership grant (BB/S01280X/1) and Designing Future Wheat Institute Strategic Programme (BB/P016855/1).
