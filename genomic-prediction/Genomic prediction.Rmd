@@ -1,0 +1,193 @@
+---
+title: "**Gene-based prediction - multiple genic kernels**"
+author: "Danilo Lyra (Statistical & Quantitative Geneticist) - Rothamsted Research - CAS"
+date: "May, 2020"
+output:
+  html_document:
+  smart: no
+  pdf_document: default
+---
+
+# Background
+We used the additive genomic best linear unbiased prediction (GBLUP) model to compare the predictive ability of four gene-based approaches (see Methods S3). Prediction of the phenotypes was performed by using the (i) genome-wide marker (35K SNP Chip) effects, (ii) TPS and (iii) TPP gene family effects, and (iv) combining the whole genome variation with the effects of the TPS and TPP gene families. We used population structure variables (matrix of zeros and ones based on Molero et al. (2019) group clustering) as fixed covariates in the model (Lyra et al., 2018). Predictive ability (r) was calculated as the Pearson correlation between adjusted values and genomic estimated breeding values in 50 replications from independent validation scenarios (Albrecht et al., 2014), randomly sampling 75% of the genotypes (n=110) to form a training set, while the remaining 25% (n=37) were used as a validation set. We applied Fisher’s Z transformation of the predictive abilities and compared them among models using Tukey’s test at α=0.05. All prediction analyses were performed using the BGLR R package (Perez & de los Campos, 2014), using 60 000 Markov Chain Monte Carlo (MCMC) iterations, with 15 000 iterations for burn-in, and keeping only one from every five consecutive iterations to minimize auto-correlation.
+
+
+```{r packages, echo=T, message=FALSE, results=FALSE, warning = FALSE}
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/genomic_prediction")
+
+library(BGLR) #prediction model
+library(psych) #fisherz
+library(plyr)
+library(agricolae)
+library(reshape2)
+library(laercio)
+
+```
+
+## Data input 
+
+```{r Data input, echo=T}
+
+load("GRM35K_GRM_TPS_GRM_TPP.RData") #load genic kernels
+phen_main=read.table("pheno_147.txt",h=T)
+
+#Y=phen_main #ALL_TRAITs
+Y=phen_main[,c(1:3)] #subset of traits
+Y$Genotype=as.character(Y$Genotype)
+
+PS=read.table("PS.txt", header=T) #Population structure covariates
+rownames(PS)=phen_main$Genotype
+
+```
+
+## GBLUP model
+
+```{r Gene models, echo=T}
+
+dirr<-getwd()
+
+#BGLR Parameters
+
+nIter=10000 # set to 60000
+burnIn=1000 # set to 15000
+thin=5
+nRep=2 # number of replications; Set to 50
+p=0.25 ## Size of TST p=0.25 = 75% of TS
+Traits<-colnames(Y[,-1])
+GenEf<-c("35K","TPS","TPP","35K_TPS_TPP")
+Comb<-expand.grid(Traits, GenEf)
+
+#j=1
+for(j in 1:nrow(Comb)){
+  y<-Y[,-1][,Comb$Var1[j]]
+  names(y)<-Y[,1]
+  
+  # Creating a directory for each line of Comb
+  nam<-paste(Comb$Var1[j], Comb$Var2[j], sep="_")
+  dir.create(nam)
+  setwd(nam)
+  
+  # Constructing the ETAs
+  #35K
+  ETA<-list(list(X=PS, model="FIXED"),
+    list(K=GRM_35K, model="RKHS", saveEffects=T))
+
+  #TPS
+  if(Comb$Var2[j]=="TPS"){
+    ETA<-list(list(X=PS, model="FIXED"),
+      list(K=GRM_TPS, model="RKHS", saveEffects=T))
+   }
+  #TPS
+  if(Comb$Var2[j]=="TPP"){
+    ETA<-list(list(X=PS, model="FIXED"),
+      list(K=GRM_TPP, model="RKHS", saveEffects=T))
+  }
+  #35K+TPS+TPP
+  if(Comb$Var2[j]=="35K_TPS_TPP"){
+    ETA<-list(list(X=PS, model="FIXED"),
+      list(K=GRM_35K, model="RKHS", saveEffects=T),  
+              list(K=GRM_TPS, model="RKHS", saveEffects=T),
+              list(K=GRM_TPP, model="RKHS", saveEffects=T))
+  }else{}
+  
+  Cor<-NULL
+  DIC<-NULL
+  
+  #i=1
+  for(i in 1:nRep){
+    
+    set.seed(i)
+    
+    # Randomly removing 49 lines (Training set of 75%)
+    rem_line_NAs= sample(1:length(y),size=p*length(y))
+    
+    yNAs<-y
+    yNAs[rem_line_NAs]<-NA
+    save(rem_line_NAs,file=paste("NAs_T2_",j,".RData",sep="")) #j is the sampling number
+    
+    
+    ### Prediction model
+    fm=BGLR(y=yNAs, ETA=ETA, nIter=nIter, burnIn=burnIn, thin=thin, verbose=F, saveAt = i)
+    
+    ### Estimating the correlations
+    yHat<-fm$yHat
+    tst<-y[rem_line_NAs]
+    Cor[i]<-cor(yHat[rem_line_NAs],tst,use="complete.obs")
+    DIC[i]=fm$fit$DIC
+    
+    cat("Rep=",i)
+    
+  }
+  setwd(dirr) # Returning to the root directory
+  save(Cor, DIC, file = paste("Corr_", Comb$Var1[j], Comb$Var2[j], ".RData") ) #Saving the Prediction ability in the root directory
+  
+}
+
+```
+
+
+## Saving results - output from prediction models
+
+```{r Output, echo=T}
+
+## First, put all RData files in one separate folder, and set as main directory
+
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/genomic_prediction/results")
+
+filename <- list.files(getwd())
+
+rep1=4*(ncol(Y)-1) #no. models x no. traits
+cor_mean=matrix(nrow=rep1, ncol=1)
+SE_trait=matrix(nrow=rep1, ncol=1)
+DIC_mean=matrix(nrow=rep1, ncol=1)
+rep2=nRep+1 #number of repetitions
+varcomps<-matrix(NA,1,rep2)
+
+for (f in filename) {
+  print(f)
+  df <- load(f)
+  Cor_data=mean(Cor)
+  cor_mean[f]=Cor_data
+  std <- function(x) sd(x)/sqrt(length(x))
+  SE=std(Cor)
+  SE_trait[f]=SE
+  DIC=mean(DIC)
+  DIC_mean[f]=DIC
+  
+  varcomps_j<-c(print(f), Cor)
+  varcomps<-rbind(varcomps, varcomps_j)
+  
+}
+
+cor_mean1=as.matrix(cor_mean)
+SE1=as.matrix(SE_trait)
+DIC_mean1=as.matrix(DIC_mean)
+
+varcomps<-varcomps[-1,] #predictive ability results
+head(varcomps)
+
+
+
+```
+
+## Tukey test
+
+```{r Tukey, echo=T}
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/genomic_prediction")
+
+CP_melt<-read.table("CP.txt", h=T) #predictive ability from the genomic prediction models
+
+# Z transformation
+Zs<-dlply(CP_melt, .(Model, Trait), function(df) as.matrix(fisherz(df$PA)))
+Zss<-ldply(Zs)
+names(Zss)<-c("Model","trait","Z")
+
+##Tukey test
+
+Tukeytest<-dlply(Zss, .(trait), function(x) Test=HSD.test(aov(Z~Model,data=x),"Model",MSerror=deviance(aov(Z~Model,data=x))/df.residual(aov(Z~Model,data=x)),
+                                                               DFerror = df.residual(aov(Z~Model,data=x)),group=T)$group)
+Ttest<-ldply(Tukeytest,.fun= function(x) data.frame(Models=rownames(x),Z=x$Z,groups=x$groups))
+Ttest<-dlply(Ttest,.(trait)) # Tukey test organized by trait
+Ttest
+
+```
