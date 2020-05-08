@@ -1,0 +1,102 @@
+---
+title: "**Quality control - exome variant filtering**"
+author: "Danilo Lyra (Statistical & Quantitative Geneticist) - Rothamsted Research - CAS"
+date: "May, 2020"
+output:
+  html_document:
+  smart: no
+  pdf_document: default
+---
+
+# Background
+Markers with low minor allele frequency (MAF, <1%) and high call rate (CR, <95%) were removed, and the remaining missing variants were imputed using Beagle 4.1 (Browning and Browning, 2016) within the codeGeno function from the Synbreed R package (Wimmer et al., 2012). Heterozygous genotypes were kept in the marker data (Allen et al., 2013). The final genotypic matrix was composed of 749 variants.
+
+
+```{r packages, echo=T, message=FALSE, results=FALSE, warning = FALSE}
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/Variant_filtering")
+
+library(data.table) # fread
+library(varhandle) #unfactor
+library(synbreed) #variant filtering
+library(dplyr)
+
+```
+
+## Data input
+
+```{r Data input, echo=T}
+Exome=fread("exome_data.txt", header=T)
+head(Exome)[1:4,1:8]
+tail(Exome)[1:4,1:8]
+
+
+## Removing genes not classified as TPS and TPP
+undefined=c("TraesCS2D02G051300",
+            "TraesCS2D02G117300",
+            "TraesCS3D02G500500",
+            "TraesCS7D02G393100",
+            "TraesCS1A02G134200")
+
+Exome = Exome[!Exome$refseq_gene_id%in%undefined,]
+
+```
+
+## Data organization
+
+
+```{r Data org, echo=T}
+
+Exome[Exome==-1] <- NA #coding missing values as NA
+sum(is.na(Exome))
+
+### MAP file 
+map_exome=as.data.frame(cbind(Exome$Chr, Exome$pos))
+colnames(map_exome) <- c("chr", "pos")
+rownames(map_exome) <- Exome$`rs#`
+map_exome$pos=unfactor(map_exome$pos)
+map_exome$chr=as.character(map_exome$chr)
+str(map_exome)
+
+# GENO file
+mat <- Exome[,-c(1:7)]
+mat=t(mat)
+colnames(mat) <- Exome$`rs#`
+
+## Number of SNPs inside gene without cleaning
+(snp_n=table(Exome$refseq_gene_id))
+
+## Data input Synbreed
+gpRef <- create.gpData(geno = mat, 
+                       map = map_exome,
+                       map.unit = "bp", 
+                       reorderMap = F)
+summary(gpRef)
+
+```
+
+
+## Quality control
+
+```{r QCA, echo=T}
+
+Z <- codeGeno(gpRef, 
+              impute = TRUE, 
+              impute.type = "beagle",
+              label.heter="alleleCoding", 
+              maf=0.01,         #MAF - marker(s) removed with maf < 0.01
+              nmiss=0.05,       #call rate (CR) - we filter using a call rate of 95%, meaning we retain SNPs for which there is less than 5% missing data
+              reference.allele="minor",
+              verbose=T)
+
+summary(Z)
+Z1<-Z$geno
+Z1map<-Z$map
+M<-Z1
+table(M)
+dim(M)
+
+
+#save(M, Z1map, file="Exome_snps_maf_1%.RData")
+## OBS:. No monomorphic markers in the gene data (Z1 file)
+```
+
