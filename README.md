@@ -18,22 +18,22 @@ We provided the exome-capture data set as well as the R scripts used in this stu
      - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/variant_filtering/Variant-filtering.html)
 
 2. **Inference of population structure and genetic differentiation - PLINK / SNPRelate R**
-     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/PS/Diversity-analysis.html)
+     - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/PS/Diversity-analysis.html)
 
 3. **Single point scan - GAPIT R**
-     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/single-scan/Single-variant-analysis.html)
+     - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/single-scan/Single-variant-analysis.html)
 
 4. **Gene-based association analysis - FREGAT R**
-     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/gene-mapping/Gene-based-analysis.html)
+     - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/gene-mapping/Gene-based-analysis.html)
 
 5. **Screening for signature of selection at the gene level - dndscv R**
-     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/signature-selection/Signature-selection.html)
+     - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/signature-selection/Signature-selection.html)
 
 6. **Partitioning the genic heritability - GCTA software**
-     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/gene-heritability/Regional_Gene_heritability.html)
+     - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/gene-heritability/Regional_Gene_heritability.html)
 
 7. **Gene-based prediction (genic kernels) - BGLR R**
-     - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/genomic-prediction/Genomic-prediction.html)
+     - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/genomic-prediction/Genomic-prediction.html)
 
 ## Funding
 Rothamsted Research receives strategic funding from the Biotechnological and Biological Sciences Research Council of the UK. We acknowledge International Wheat Yield Partnership grant (BB/S01280X/1) and Designing Future Wheat Institute Strategic Programme (BB/P016855/1).
