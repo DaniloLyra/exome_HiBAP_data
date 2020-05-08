@@ -40,9 +40,9 @@ Rothamsted Research receives strategic funding from the Biotechnological and Bio
 
 <p float="left">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/rothamsted-logo.png" width="200" height="60">
+<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/image_1.jpeg" width="100" height="100">
+<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/Earlham_Institute_logo.png" width="120" height="60">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/DFW-logo.jpg" width="100" height="100">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/bbsrc-logo.jpg" width="200" height="100">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/iwyp-Logo.png" width="150" height="100">
-<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/image_1.jpeg" width="100" height="100">
- <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/Earlham_Institute_logo.png" width="120" height="50">
 </p>
