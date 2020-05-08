@@ -1,0 +1,114 @@
+---
+title: "**Single variant association analysis**"
+author: "Danilo Lyra (Statistical & Quantitative Geneticist) - Rothamsted Research - CAS"
+date: "May, 2020"
+output:
+  html_document:
+  smart: no
+  pdf_document: default
+---
+
+# Background
+Single variant association analysis was performed using a Mixed Linear Model (MLM) in GAPIT v3.0 R package (Lipka et al., 2012; Wang & Zhang, 2018) incorporating genomic kinship (K) matrix and the first three PCs (Q) to control for the confounding effects of cryptic relatedness and population structure (Yu et al., 2006). The default false discovery rate (FDR) (Benjamini & Hochberg, 1995) and Bonferroni multiple testing (Hochberg, 1988) was used to correct the genome-wide significance thresholds (α=0.05).
+
+
+```{r packages, echo=T, message=FALSE, results=FALSE, warning = FALSE}
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/Single-variant-analysis")
+
+#devtools::install_github("jiabowang/GAPIT3",force=TRUE)
+library(GAPIT3)
+library(qqman) #QQ plot and Manhattan plot
+
+source("http://www.zzlab.net/GAPIT/GAPIT.library.R")
+source("http://www.zzlab.net/GAPIT/gapit_functions.txt")
+
+```
+
+## Data input
+
+```{r Data input, echo=T}
+##Load
+load("Exome_snps_maf_1%.RData")
+
+# Phenotype
+my_pheno  <- read.table("y_data.txt", head = TRUE)
+str(my_pheno)
+#head(my_pheno)
+
+# MAP file
+{
+  Z1map$chr[Z1map$chr=="1A"]=1
+  Z1map$chr[Z1map$chr=="1B"]=2
+  Z1map$chr[Z1map$chr=="1D"]=3
+  Z1map$chr[Z1map$chr=="2A"]=4
+  Z1map$chr[Z1map$chr=="2B"]=5
+  Z1map$chr[Z1map$chr=="2D"]=6
+  Z1map$chr[Z1map$chr=="3A"]=7
+  Z1map$chr[Z1map$chr=="3B"]=8
+  Z1map$chr[Z1map$chr=="3D"]=9
+  Z1map$chr[Z1map$chr=="4A"]=10
+  Z1map$chr[Z1map$chr=="4B"]=11
+  Z1map$chr[Z1map$chr=="4D"]=12
+  Z1map$chr[Z1map$chr=="5A"]=13
+  Z1map$chr[Z1map$chr=="5B"]=14
+  Z1map$chr[Z1map$chr=="5D"]=15
+  Z1map$chr[Z1map$chr=="6A"]=16
+  Z1map$chr[Z1map$chr=="6B"]=17
+  Z1map$chr[Z1map$chr=="6D"]=18
+  Z1map$chr[Z1map$chr=="7A"]=19
+  Z1map$chr[Z1map$chr=="7B"]=20
+  Z1map$chr[Z1map$chr=="7D"]=21
+} # convert chr
+Z1map$chr=as.numeric(Z1map$chr)
+
+name_snp=rownames(Z1map)
+map_gwas=Z1map[,c(1,2)]
+map_gwas$marker=name_snp
+map_gwas$marker=as.factor(map_gwas$marker)
+map_gwas <- map_gwas[c("marker", "chr", "pos")] # reorder by column name
+
+## GENO file
+MM=as.data.frame(M)
+name_id=rownames(MM)
+myGD=cbind(name_id, MM)
+
+```
+
+## Single point scan - Mixed Linear Model (MLM)
+
+```{r SVA_QCA, echo=T, message=FALSE, results=FALSE, warning = FALSE}
+
+# Mixed Linear Model (MLM) 
+myGAPIT <- GAPIT(
+  #Y=my_pheno,        #all phenotypes
+  Y=my_pheno[,c(1,10)], #selecting PH
+  GD=myGD,
+  GM=map_gwas,
+  model="MLM",
+  file.output=F,  #set to TRUE to save results in folder
+  PCA.total=3
+)
+
+
+```
+
+## Manhattan and QQ plot
+
+```{r Plot_QCA, echo=T}
+
+#Plant height (PH)
+gap_gwas=myGAPIT$GWAS
+gap_gwas=gap_gwas[order(gap_gwas$P.value),]
+head(gap_gwas)
+
+#QQplot
+qq(gap_gwas$P.value)
+
+#Manhattan plot
+manhattan(gap_gwas, chr="Chromosome", bp="Position ", snp="SNP", p="P.value", 
+          suggestiveline = -log10(0.05/749), #bonferroni correction
+          genomewideline = F,
+          annotatePval = 0.01)
+
+```
+
