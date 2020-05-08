@@ -21,10 +21,10 @@ We provided the exome-capture data set as well as the R scripts used in this stu
      - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/PS/Diversity-analysis.html?token=ACXKHZ4CMBENARRKIJIFZM26WVW72)
 
 3. **Single point scan - GAPIT R**
-- file
+     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/single-scan/Single-variant-analysis.html?token=ACXKHZ7EAUHB267OHKL4POS6WVXZY)
 
 4. **Gene-based association analysis - FREGAT R**
-- file
+     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/gene-mapping/Gene-based-analysis.html?token=ACXKHZYBAOCTIMNVTZURG7S6WVX6A)
 
 5. **Screening for signature of selection at the gene level - dndscv R**
 - file
