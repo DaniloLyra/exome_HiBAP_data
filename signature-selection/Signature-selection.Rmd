@@ -1,0 +1,78 @@
+---
+title: "**Screening for signature of selection at the gene level**"
+author: "Danilo Lyra (Statistical & Quantitative Geneticist) - Rothamsted Research - CAS"
+date: "May, 2020"
+output:
+  html_document:
+  smart: no
+  pdf_document: default
+---
+
+# Background
+We evaluated the evidence of selection at the gene level by estimating the normalized ratio of nonsynonymous (missense, nonsense, and splicing) substitutions per synonymous site (𝜔 = dN/dS) using an optimized Poisson-based model (dNdScv) in the dndscv R package (Martincorena et al., 2017). Briefly, this model accounts for variation in mutation rates, sequence context, and full trinucleotide mutability. To estimate the mutation rate of a gene it uses a joint likelihood function combining local (synonymous substitutions in a gene) and global (negative binomial regression across genes) information to estimate the mutation rate of a gene. We used the buildref function to input the wheat reference genome (IWGSC RefSeq v1.0 annotation) from Ensembl Plants per chromosome. Global 𝜔 estimates across all genes were estimated per chromosome. A global q-value ≤ 0.1 (without considering InDels) was used to identify statistically significant genes. A confidence interval (α = 0.95) was calculated per gene. Selection was measured as positive (𝜔 > 1), negative (𝜔 <1), and neutral (𝜔 =1) (Nielsen, 2005).
+
+
+```{r packages, echo=T, message=FALSE, results=FALSE, warning = FALSE}
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/Signature of selection")
+
+library(dndscv) #Installation and tutorial: https://github.com/im3sanger/dndscv
+library(data.table)
+
+```
+
+## Inputs for the buildref function 
+
+```{r Data input, echo=T}
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/Signature of selection")
+
+#HiBAP wheat variants
+mut_wheat=read.table("wheat_variants.txt", h=T)
+mut_wheat$sampleID=as.character(mut_wheat$sampleID)
+mut_wheat$chr=as.character(mut_wheat$chr)
+mut_wheat$ref=as.character(mut_wheat$ref)
+mut_wheat$mut=as.character(mut_wheat$mut)
+head(mut_wheat)
+
+#Table of transcripts - from biomart - Ensembl Plants
+load("biomart_wheat.RData")
+#http://htmlpreview.github.io/?http://github.com/im3sanger/dndscv/blob/master/vignettes/buildre#f.html
+print(head(Biomart_wheat), digits = 3)
+
+```
+
+## dNdScv model
+
+```{r Selection, echo=T}
+
+#### CDS file
+path_cds_table = file.path("C:", "Users", "rnaly", "OneDrive", "Desktop","DnDs_R",  "Biomart1.txt")
+
+#############################################################################################
+### Download the fasta files for each CHR in ftp://ftp.ensemblgenomes.org/pub/plants/release-46/fasta/triticum_aestivum/dna/
+#############################################################################################
+
+#Example of the Chr1A
+path_genome_fasta_1A = file.path("C:", "Users", "rnaly", "OneDrive", "Desktop","DnDs_R",  "Triticum_aestivum.IWGSC.dna.chromosome.1A.fa")
+
+#build Ref
+buildref(cdsfile=path_cds_table, 
+         genomefile=path_genome_fasta_1A, 
+         outfile = "wheat_example_output_refcds_1A.rda", 
+         excludechrs="MT")
+
+#dndscv model to estimate dN/dS ratios
+dndsout_1A = dndscv(mut_wheat, 
+                    refdb="wheat_example_output_refcds_1A.rda", 
+                    outmats=T)     ## estimate CI
+                    #sm = "2r_3w" ## traditional transition/transversion (ts/tv) model
+                    #cv=NULL)  #covariates
+
+
+print(dndsout_1A$sel_cv) #Table of dN/dS ratios
+(global_dnds = dndsout_1A$globaldnds) #Global dN/dS estimates
+(annotmuts=dndsout_1A$annotmuts) #annotated table of coding mutations
+(ci = geneci(dndsout_1A)) #confidence intervals for the dN/dS ratios
+
+#Results from all chr are available in the Table S1
+```
+
