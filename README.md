@@ -11,11 +11,11 @@
 Trehalose 6-phosphate (T6P) signalling regulates carbon use and allocation and is a target to improve crop yields. We used exome-capture sequencing on trehalose phosphate synthase (TPS) and trehalose phosphate phosphatase (TPP) genes and a large phenotypic data set for the dissection of the genetic architecture (e.g. using gene-based mapping, regional heritability, signature of selection, and gene-based prediction) of yield-related traits in a wheat (*Triticum aestivum*) breeding panel. Mapping population and phenotypic data analyses have been described by Molero *et al.* (2019). Briefly, we used the High Biomass Association Mapping Panel (HiBAP) comprising 149 wheat spring genotypes of the CIMMYT breeding programme. This panel was characterized into two main subpopulations consisting of 97 elite high yield and 52 exotic high biomass (landraces and pre-breeding) materials.
 
 ## Readme
-We provided the exome-capture data set as well as the R scripts used in this study for most of the analyses. Codes are presented as Rmarkdown files. See ‘table of contents’ for more details about the methods and approaches. The input data sets are provided in each separate folder in this repository. The 35K SNP Chip and phenotypic data set are available in Molero et al. (2019).
+We provided the exome-capture data set as well as the R scripts used in this study for most of the analyses. See ‘table of contents’ for more details about the methods and approaches. The input data sets are provided in each separate folder in this repository. Codes are presented as Rmarkdown files (.Rmd files). The 35K SNP Chip and phenotypic data set are available in Molero et al. (2019).
 
 ## Table of contents
 1. **Variant filtering (quality control) - Synbreed R**
-- file
+  - [html output](https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/variant_filtering/Variant-filtering.html)
 
 2. **Inference of population structure and genetic differentiation - PLINK / SNPRelate R**
 - file
@@ -40,7 +40,7 @@ Rothamsted Research receives strategic funding from the Biotechnological and Bio
 
 <p float="left">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/rothamsted-logo.png" width="200" height="60">
-<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/image_1.jpeg" width="100" height="100">
+<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/image_1.jpeg" width="100" height="80">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/Earlham_Institute_logo.png" width="120" height="60">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/DFW-logo.jpg" width="100" height="100">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/bbsrc-logo.jpg" width="200" height="100">
