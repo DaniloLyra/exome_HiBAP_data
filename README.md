@@ -7,7 +7,7 @@
 <sup>3</sup>The Earlham Institute, Norwich, UK
 <sup>4</sup>Global Wheat Program, International Maize and Wheat Improvement Centre (CIMMYT), Texcoco, Mexico
 
-## Abstract
+## Background
 Trehalose 6-phosphate (T6P) signalling regulates carbon use and allocation and is a target to improve crop yields. We used exome-capture sequencing on trehalose phosphate synthase (TPS) and trehalose phosphate phosphatase (TPP) genes and a large phenotypic data set for the dissection of the genetic architecture (e.g. using gene-based mapping, regional heritability, signature of selection, and gene-based prediction) of yield-related traits in a wheat (*Triticum aestivum*) breeding panel. Mapping population and phenotypic data analyses have been described by Molero *et al.* (2019). Briefly, we used the High Biomass Association Mapping Panel (HiBAP) comprising 149 wheat spring genotypes of the CIMMYT breeding programme. This panel was characterized into two main subpopulations consisting of 97 elite high yield and 52 exotic high biomass (landraces and pre-breeding) materials.
 
 ## Readme
@@ -39,7 +39,7 @@ We provided the exome-capture data set as well as the R scripts used in this stu
 Rothamsted Research receives strategic funding from the Biotechnological and Biological Sciences Research Council of the UK. We acknowledge International Wheat Yield Partnership grant (BB/S01280X/1) and Designing Future Wheat Institute Strategic Programme (BB/P016855/1).
 
 <p float="left">
-<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/rothamsted-logo.png" width="200" height="100">
+<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/rothamsted-logo.png" width="200" height="60">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/DFW-logo.jpg" width="100" height="100">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/bbsrc-logo.jpg" width="200" height="100">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/iwyp-Logo.png" width="150" height="100">
