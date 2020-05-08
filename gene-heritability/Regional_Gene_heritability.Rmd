@@ -1,0 +1,131 @@
+---
+title: "**Proportion of variance explained by single gene - partitioning the genomic heritability**"
+author: "Danilo Lyra (Statistical & Quantitative Geneticist) - Rothamsted Research - CAS"
+date: "May, 2020"
+output:
+  html_document:
+  smart: no
+  pdf_document: default
+---
+
+# Background
+We investigated the genetic architecture of complex traits by partitioning the genetic variation of individual genes and gene families using the genomic-relatedness-based restricted maximum-likelihood (GREML) approach (Yang et al., 2010) implemented in GCTA software v1.93.1beta (Yang et al., 2011a). To estimate the proportion of the phenotypic variance explained (i.e. genomic heritability) per gene we fitted in the model multiple genomic relationship matrices (GRM), one contributed by the whole genome (35K SNP Chip) and a second by a specific gene region. The proportion of heritability was estimated ignoring PS (results shown in the main manuscript) and adjusting PCs as fixed covariates (supplementary information).
+
+
+```{r packages, echo=T, message=FALSE, results=FALSE, warning = FALSE}
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/Gene_heritability")
+
+library(data.table)
+library(varhandle)
+library(plyr)
+
+```
+
+## Data set inputs
+
+```{r Data input, echo=T}
+
+load("support_info.RData")
+
+gene_type=fread("gene_type.txt", header=T)
+head(gene_type)
+
+##matrix input
+varcomps<-matrix(NA,1,13)
+colnames(varcomps)<-c("Trait","Gene","LRT","LRT_pvalue" ,"-log10(p)_LRT","V(G1)","V(G2)","V(e)","V(p)","V(G1)/Vp","V(G2)/Vp","SE_V(G1)/Vp","SE_V(G2)/Vp")
+
+phen_main=read.table("pheno_147_gcta.txt",h=T)
+ngenes=nrow(gene_type)
+
+```
+
+## Regional Heritability Mapping - GCTA model
+
+```{r GCTA, echo=T, message=FALSE, results=FALSE, warning = FALSE}
+
+for(j in 3:ncol(phen_main)){
+  
+  pheno=phen_main[,c(1,2, j)]
+  trait=colnames(pheno[3])
+  
+  write.table(pheno, "LOCAL_GENE.phen", sep=" ", quote = FALSE, row.names=F, col.names=F)
+  write.table(pheno, "GRM_35K.phen", sep=" ", quote = FALSE, row.names=F, col.names=F)
+
+#  i=5
+for (i in 1:ngenes){
+  gene_sel=gene_type[i,2]
+  gname=gene_sel$Gene_ID
+  
+  ## Gene matrix
+  TPS_merge=merge(gene_sel, map_genes1, by="Gene_ID")
+  col.num <- which(colnames(M) %in% TPS_merge$SNP_ID)
+  M_TPS <- M[,col.num]
+ 
+  #### GRM removing 2 lines = make equal with 35K
+  M_TPS = M_TPS[which(rownames(M_TPS) != "HiBAP_2"), ]
+  M_TPS = M_TPS[which(rownames(M_TPS) != "HiBAP_30"), ]
+  
+  ##################################
+  ## removing Monomorphic markers
+  ##################################
+  M1=data.frame(M_TPS)
+  M2 = M1[ , which(colMeans(M1) != 0)]
+  M2 = M2[ , which(colMeans(M2) != 1)]
+  M2 = M2[ , which(colMeans(M2) != 2)]
+  
+  #### GRM - genic kernels
+  W_GRM=scale(M2, center = T, scale = T)
+  t_GRM=t(W_GRM)
+  GRM=(W_GRM %*% t_GRM) / ncol(M2)
+
+  ###GCTA_GRM
+  off_GRM=GRM[upper.tri(GRM,diag=T)]
+  zz <- file("LOCAL_GENE.grm.bin", "wb")
+  writeBin(off_GRM, zz, size=4)
+  close(zz)
+  
+  ## set for ignoring PS
+system("./gcta64 --reml --mgrm multi_GRM.txt --pheno LOCAL_GENE.phen --reml-lrt 2 --reml-maxit 200 --out multi_grm", intern=F, wait=T,invisible = F)
+  
+  #set for including PS
+#  system("./gcta64 --reml --mgrm multi_GRM.txt --pheno LOCAL_GENE.phen --reml-lrt 2 --reml-maxit 200 --qcovar PCcov.qcovar --out multi_grm", intern=F, wait=T,invisible = F)
+  
+  varcomp_gcta<-read.table('multi_grm.hsq', fill = TRUE)
+  varcomp_gcta=as.matrix(varcomp_gcta)
+  pvalue=as.numeric(varcomp_gcta[14,2]) #pvalue LRT
+  mlog10=-log10(pvalue) #-log10(p)
+  
+  varcomps_j<-c(trait,gname,varcomp_gcta[12,2],varcomp_gcta[14,2],mlog10,varcomp_gcta[2,2],varcomp_gcta[3,2],varcomp_gcta[4,2],varcomp_gcta[5,2],varcomp_gcta[6,2],varcomp_gcta[7,2],varcomp_gcta[6,3],varcomp_gcta[7,3])
+  
+  print (c(i, j ))
+  varcomps<-rbind(varcomps,varcomps_j)
+
+}
+  
+}
+
+#save.image("VarExp_pergene_no_cov.RData")
+#save.image("VarExp_pergene_Cov_PCs.RData")
+
+```
+
+## Loading results
+
+```{r results, echo=T}
+load("VarExp_pergene_no_cov.RData")
+varcomps<-varcomps[-1,]
+head(varcomps)
+
+# bonferroni control
+bonf_thr=0.05/38 #ngenes
+(log10_bonf_thr=-log10(bonf_thr) )
+
+#removing values that did not converge 
+#for (i in 1:nrow(varcomps)){
+#  if(varcomps[i,6] == varcomps[i+1,6]) {
+#    varcomps[i+1,c(3:5)] = NA
+#  }
+#}
+
+
+```
