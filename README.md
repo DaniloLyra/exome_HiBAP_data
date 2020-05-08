@@ -38,8 +38,10 @@ We provided the exome-capture data set as well as the R scripts used in this stu
 ## Funding
 Rothamsted Research receives strategic funding from the Biotechnological and Biological Sciences Research Council of the UK. We acknowledge International Wheat Yield Partnership grant (BB/S01280X/1) and Designing Future Wheat Institute Strategic Programme (BB/P016855/1).
 
-<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/rothamsted-logo.png" width="100" height="100">
+<p float="left">
+<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/rothamsted-logo.png" width="150" height="100">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/DFW-logo.jpg" width="100" height="100">
-<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/bbsrc-logo.jpg" width="100" height="100">
+<img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/bbsrc-logo.jpg" width="150" height="100">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/iwyp-Logo.png" width="100" height="100">
 <img src="https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/Pictures/image_1.jpeg" width="100" height="100">
+</p>
