@@ -27,10 +27,10 @@ We provided the exome-capture data set as well as the R scripts used in this stu
      - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/gene-mapping/Gene-based-analysis.html?token=ACXKHZYBAOCTIMNVTZURG7S6WVX6A)
 
 5. **Screening for signature of selection at the gene level - dndscv R**
-- file
+     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/signature-selection/Signature-selection.html?token=ACXKHZ5476ELAJ57AQK5R5S6WVZJW)
 
 6. **Partitioning the genic heritability - GCTA software**
-- file
+     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/gene-heritability/Regional_Gene_heritability.html?token=ACXKHZ7TQS22EXEHLQG2TMS6WV3KY)
 
 7. **Gene-based prediction (genic kernels) - BGLR R**
 - file
