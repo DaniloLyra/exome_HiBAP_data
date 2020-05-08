@@ -33,7 +33,7 @@ We provided the exome-capture data set as well as the R scripts used in this stu
      - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/gene-heritability/Regional_Gene_heritability.html?token=ACXKHZ7TQS22EXEHLQG2TMS6WV3KY)
 
 7. **Gene-based prediction (genic kernels) - BGLR R**
-- file
+     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/genomic-prediction/Genomic-prediction.html?token=ACXKHZZ3QJOD2VS6DBY7PNC6WV4KA)
 
 ## Funding
 Rothamsted Research receives strategic funding from the Biotechnological and Biological Sciences Research Council of the UK. We acknowledge International Wheat Yield Partnership grant (BB/S01280X/1) and Designing Future Wheat Institute Strategic Programme (BB/P016855/1).
