@@ -1,0 +1,247 @@
+---
+title: "**Gene-based association analysis**"
+author: "Danilo Lyra (Statistical & Quantitative Geneticist) - Rothamsted Research - CAS"
+date: "May, 2020"
+output:
+  html_document:
+  smart: no
+  pdf_document: default
+---
+
+# Background
+Following recommendations that region-based tests have different assumptions about the genetic effects and weighting functions (Lee et al., 2014; Nicolae, 2016; Bomba et al., 2017), we measured the performance of gene mapping empirically using three approaches. First, we used a traditional multiple linear regression (MLR) model (Chapman & Whittaker, 2008) considering genotype effects as fixed. Second, we applied the SKAT model (Wu et al., 2011; Chen et al., 2013) assigning an Identity by State (IBS) kernel function. Third, we used the combination of burden test and SKAT named SKAT-O (Lee et al., 2012; Lee et al., 2014). Both kernel-based tests consider the genotype effects as random. Variance components were estimated using restricted maximum likelihood (REML). The weights were calculated using the standard probability density function of the beta distribution. For further detail on the model description see Svishcheva et al. (2019). We estimated the P values by using Kuonen’s method (Kuonen, 1999) and considered the mode of inheritance as additive. The genomic relationship matrix (GRM) was calculated using the first formula proposed by VanRaden (2008), and the first three PCs were used as covariates in the models. Gene-based mapping was performed using the MLR and FFBSKAT (rho was assigned for SKAT-O test) functions in the FREGAT R package (Belonogova et al., 2016). We included all variant annotations (coding and non-coding) in the tests (Neale & Sham, 2004) following suggestions that combining signals from multiple mutations in the same gene increases model statistical power (Sham & Purcell, 2014). We adjusted the P-values for multiple comparisons to control for type I error at α = 0.05 using the traditional FDR and Bonferroni procedure (the number of genes tested was considered to set the threshold) using the p.adjust R function. Finally, quantile-quantile (Q-Q) plots were used to verify the fitness of the model and plotted using the CMplot R package (https://github.com/YinLiLin/R-CMplot).
+
+
+```{r packages, echo=T, message=FALSE, results=FALSE, warning = FALSE}
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/Gene-based-analysis")
+
+#Install FREGAT:
+#install.packages("https://cran.r-project.org/src/contrib/Archive/FREGAT/FREGAT_1.1.0.tar.gz", repos=NULL)
+
+library(FREGAT) #gene-based models
+library(snpReady) #GRM VanRaden
+library(data.table)
+library(varhandle)
+library(plyr)
+library(reshape)
+
+```
+
+## Data input 
+
+```{r Data input, echo=T}
+
+# load
+load("Exome_snps_maf_1%.RData") #quality control scenario A
+
+## Data input
+Exome=fread("exome_data.txt", header=T) #exome input
+PC_values=read.table("PC_exome.txt", header=T) #PCA values
+myY  <- read.table("y_data.txt", head = TRUE) # pheno data
+
+pos <- which(Exome$pos %in% Z1map$pos) #selecting gene name
+map_genes <- Exome[pos,]
+
+map_genes1=cbind(map_genes$`rs#`, map_genes$Chr, map_genes$pos,map_genes$refseq_gene_id)
+map_genes1=as.data.frame(map_genes1)
+colnames(map_genes1)=c("SNP_ID", "Chr", "Pos", "Gene_ID")
+map_genes1$Pos=unfactor(map_genes1$Pos)
+map_genes1$SNP_ID=as.character(map_genes1$SNP_ID)
+map_genes1$Chr=as.character(map_genes1$Chr)
+map_genes1$Gene_ID=as.character(map_genes1$Gene_ID)
+
+{
+  map_genes1$Chr[map_genes1$Chr=="1A"]=1
+  map_genes1$Chr[map_genes1$Chr=="1B"]=2
+  map_genes1$Chr[map_genes1$Chr=="1D"]=3
+  map_genes1$Chr[map_genes1$Chr=="2A"]=4
+  map_genes1$Chr[map_genes1$Chr=="2B"]=5
+  map_genes1$Chr[map_genes1$Chr=="2D"]=6
+  map_genes1$Chr[map_genes1$Chr=="3A"]=7
+  map_genes1$Chr[map_genes1$Chr=="3B"]=8
+  map_genes1$Chr[map_genes1$Chr=="3D"]=9
+  map_genes1$Chr[map_genes1$Chr=="4A"]=10
+  map_genes1$Chr[map_genes1$Chr=="4B"]=11
+  map_genes1$Chr[map_genes1$Chr=="4D"]=12
+  map_genes1$Chr[map_genes1$Chr=="5A"]=13
+  map_genes1$Chr[map_genes1$Chr=="5B"]=14
+  map_genes1$Chr[map_genes1$Chr=="5D"]=15
+  map_genes1$Chr[map_genes1$Chr=="6A"]=16
+  map_genes1$Chr[map_genes1$Chr=="6B"]=17
+  map_genes1$Chr[map_genes1$Chr=="6D"]=18
+  map_genes1$Chr[map_genes1$Chr=="7A"]=19
+  map_genes1$Chr[map_genes1$Chr=="7B"]=20
+  map_genes1$Chr[map_genes1$Chr=="7D"]=21
+} # convert chr
+map_genes1$Chr=as.numeric(map_genes1$Chr)
+
+## Number of SNPs inside gene
+snp_n=table(map_genes1$Gene_ID)
+
+#### Order SNP name in M file
+M=M[,sort(colnames(M))]
+
+#### Sort SNP_name in the same order as M
+map_genes1=map_genes1[order(map_genes1$SNP_ID),]
+
+###################################################
+## removing genes with only one variant - QCA
+###################################################
+gene=subset(map_genes1, Gene_ID=="TraesCS3D02G289100" | 
+              Gene_ID=="TraesCS5B02G202200" |
+              Gene_ID=="TraesCS2A02G412100" | 
+              Gene_ID=="TraesCS2D02G168300" | 
+              Gene_ID=="TraesCS5B02G193100" |
+              Gene_ID=="TraesCS6D02G281100")
+
+rown <- which(colnames(M) %in% gene$SNP_ID  )
+M <- M[,-rown]
+map_genes1 <- map_genes1[-rown,]
+
+#save.image("all.data_scenarioA.RData")
+
+```
+
+## Gene-based models - SKAT / SKAT-O / MLR
+
+```{r Gene models, echo=T}
+
+#### GRM VanRaden
+Wide <<- (G.matrix(M, method = "VanRaden", format = "wide"))  #GK    VanRaden   UARadj
+GRM=Wide$Ga
+
+###########################
+## Gene-based models 
+###########################
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/Gene-based-analysis/gene_results") ## save results in one separate folder
+
+#colnames(myY)
+Traits<-c("yield", "TGW", "HI", "BM", "GM2", "SM2", "GSP", "GWSP",     
+          "Height", "PGF", "GFR",  "DTInB",  "DTA",  "DTM", "TTInB", "TTAnth", "TTPM",     
+          "TTA7H",  "RSGP",  "SPKLSP","InfSPKLSP", "Spike", "Awns", "Ped")
+
+
+Model<-c("SKAT_KERNEL", "SKATO",  "MLR")
+
+Comb<-expand.grid(Traits, Model)
+
+#j=1
+for(j in 1:nrow(Comb)){
+  
+  tryCatch({ #function to ignore error
+    
+  y<-myY[,-1][,Comb$Var1[j]]
+  names(y)<-myY[,1]
+  y=as.data.frame(y)
+  y$PC1=PC_values$PC1
+  y$PC2=PC_values$PC2
+  y$PC3=PC_values$PC3
+  
+  out_results<-NULL
+  out_nullmod<-NULL
+  log.pval<-NULL
+  
+  # SKAT
+  if(Comb$Var2[j]=="SKAT_KERNEL"){
+    
+    ##### SKAT
+    out <- FFBSKAT(y ~ PC1 + PC2 + PC3, ## name phenotype
+                   y, # pheno file
+                   M,   # geno file
+                   GRM, # kinship info
+                   regions = map_genes1$Gene_ID,   #gene region
+                   return.variance.explained = TRUE,
+                   method="kuonen",  #davies
+                   ncores=1,
+                   mode="add",    #"add", "dom" or "rec" for additive, dominant or recessive mode
+                   kernel = "IBS") #"linear.weighted" (default); "quadratic" "2wayIX"; "IBS"; "IBS.weighted")
+    out_results = out$results
+    out_nullmod = data.frame(out$nullmod)
+    log.pval = data.frame(-log10(out$results$pvalue))
+
+    
+  }
+  
+  #SKATO
+  if(Comb$Var2[j]=="SKATO"){
+    
+    out <- FFBSKAT(y ~ PC1 + PC2 + PC3, ## name phenotype
+                   y, # pheno file
+                   M,   # geno file
+                   GRM, # kinship info
+                   regions = map_genes1$Gene_ID,   #gene region
+                   return.variance.explained = TRUE,
+                   method="kuonen",  #davies
+                   ncores=1,
+                   rho=T,  #SKAT-O model
+                   mode="add")    #"add", "dom" or "rec" for additive, dominant or recessive mode)
+    out_results = out$results
+    out_nullmod = data.frame(out$nullmod)
+    log.pval = data.frame(-log10(out$results$pvalue))
+    
+    }
+  
+  #MLR
+  if(Comb$Var2[j]=="MLR"){
+    
+    
+    out <- MLR(y ~ PC1 + PC2 + PC3, ## name phenotype
+                  y, # pheno file
+                  M,   # geno file
+                  GRM, # kinship info
+                  regions = map_genes1$Gene_ID,   #gene region
+                  method="kuonen",  #davies
+                  ncores=1,
+                  mode="add")    #"add", "dom" or "rec" for additive, dominant or recessive mode)
+    out_results = out$results
+    out_nullmod = data.frame(out$nullmod)
+    #qq(out$results$pvalue)
+    log.pval = data.frame(-log10(out$results$pvalue))
+    
+  }
+  
+  ##error
+  }
+  , error=function(e){cat("ERROR :",conditionMessage(e), "\n")} ##print the error message
+  )
+  
+  ##
+  cat("Trait", Comb$Var1[j], "Model",j)
+  cat("\n")  ## show in each line
+  
+  save(out_results, out_nullmod, log.pval, file = paste(Comb$Var1[j], Comb$Var2[j], ".RData", sep="_") )
+  
+  #setwd(dirr) # Returning to the root directory
+}
+
+out_results_1=list()
+nullmod_1=list()
+log.val_1=list()
+pvalue=list()
+  
+for(i in 1:nrow(Comb)){
+  
+    nam<-paste(Comb$Var1[i],Comb$Var2[i],sep="_")
+  
+    fname = paste(nam,'.RData', sep="_")
+    load(fname)
+    colnames(log.pval)=nam
+    pval=data.frame(out_results$pvalue)
+    colnames(pval)=nam
+    
+  out_results_1[[i]]=out_results
+  nullmod_1[[i]]=out_nullmod
+  log.val_1[[i]]=log.pval
+  pvalue[[i]]=pval
+  
+}
+
+## -log10
+Log_alltraits<-data.frame(log.val_1)
+rownames(Log_alltraits)=out_results$region
+Log_alltraits<-Log_alltraits[,order(colnames(Log_alltraits))]
+Log_alltraits[1:6,1:6]
+
+
+```
+
