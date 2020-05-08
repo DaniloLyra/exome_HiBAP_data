@@ -15,7 +15,7 @@ We provided the exome-capture data set as well as the R scripts used in this stu
 
 ## Table of contents
 1. **Variant filtering (quality control) - Synbreed R**
-     - [html output](https://htmlpreview.github.io/https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/variant_filtering/Variant-filtering.html?token=ACXKHZ6SCSX7AH2LIEPHVG26WVFHU)
+     - [html output](http://htmlpreview.github.io/?https://raw.githubusercontent.com/DaniloLyra/exome_HiBAP_data/master/variant_filtering/Variant-filtering.html?token=ACXKHZ5LDUD5YXC27M3T4EC6WVGPM)
 
 2. **Inference of population structure and genetic differentiation - PLINK / SNPRelate R**
 - file
