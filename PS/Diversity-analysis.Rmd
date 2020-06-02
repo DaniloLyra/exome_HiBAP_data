@@ -1,0 +1,303 @@
+---
+title: "**Inference of population structure and genetic differentiation**"
+author: "Danilo Lyra (Statistical & Quantitative Geneticist) - Rothamsted Research - CAS"
+date: "May, 2020"
+output:
+  html_document:
+  smart: no
+  pdf_document: default
+---
+
+# Background
+We detected the genomic diversity structure of the population at the gene level. First, we applied a principal component (PC) analysis using the SNPRelate R package (snpgdsPCA function) (Zheng et al., 2012). Second, we applied a discriminant analysis of principal components (DAPCs) using the adegenet R package (Jombart et al., 2010). Group clustering used was inferred by Molero et al. (2019). The contributions (loadings) of each gene variant were estimated using the loadingplot function. Finally, a neighbor-joining tree (NJT) was generated based on the modified Euclidean distance using the ape R package (Paradis et al., 2004) and the pairwise genetic distance between populations (Fst) was calculated following Weir and Cockerham (1984) in SNPRelate R package. The genome-wide marker data, generated using the 35K Affymetrix Axiom® HD wheat SNP array (Allen et al., 2017), was used only for the DAPCs.
+
+
+```{r packages, echo=T, message=FALSE, results=FALSE, warning = FALSE}
+setwd("C:/Users/rnaly/OneDrive/Desktop/Data_archive_exome/Diversity_analysis")
+
+library(data.table) # fread
+library(SNPRelate) #PCA and Fst
+library(ggplot2) #plot
+library(grid)
+library(plyr)
+library(adegenet) #DAPC
+library(ape) #NJT
+library(reshape) #melt
+library(snpReady) #popgen
+library(LDheatmap) #LD block
+library(snpStats) #inout LDblock
+
+load("Exome_snps_maf_1%.RData")
+
+```
+
+## Principal Component Analysis (PCA)
+
+```{r PCA, echo=T}
+
+#Load data
+SNP_line=data.matrix(M)
+id.sample = rownames(M)
+id.snp = colnames(M)
+
+M1=as.matrix(M)
+
+# Create a gds file
+#snpgdsCreateGeno("ttest.gds", genmat = M1,
+#                 sample.id = id.sample, snp.id = id.snp,
+#                 snpfirstdim=F)
+
+#Open the GDS file
+(genofile <- snpgdsOpen("ttest.gds"))
+
+## PCA
+pca <- snpgdsPCA(genofile, eigen.cnt = 149)
+
+eigenvect = pca$eigenvect
+eigenval = pca$eigenval
+pc.percent = pca$varprop*100
+head(round(pc.percent, 2)) # variance pca
+
+## Variance of PCA
+barplot(pc.percent,  
+        main = "Variances",
+        xlab = "Principal Components",
+        ylab = "Percentage of variances",
+        col ="steelblue")
+
+```
+
+
+
+## PCA plot
+
+```{r PCA plot, echo=T}
+
+myCol=c("#99C794","#6699CC")
+PC_values=read.table("PC_exome.txt", header=T)
+
+ggplot(PC_values, aes(x=PC1, y=PC2, colour = Group, fill = Group)) +
+  scale_size_area() +
+  geom_point(size = 7, pch = 21, stroke = 1, alpha=0.9, color="black") +
+  
+  geom_vline(xintercept = 0, lty="dotted",color="Black",size=0.8) +    # line in X-Axis
+  geom_hline(yintercept = 0, lty="dotted",color="Black",size=0.8) +
+  
+  scale_x_continuous(name = " ", 
+                     breaks = seq(-0.7, 0.7, 0.2),
+                     limits=c(-0.7,0.7),
+                     expand = c(0,0)) +
+  
+  scale_y_continuous(name = " ", 
+                     breaks = seq(-0.7, 0.7, 0.2),
+                     limits=c(-0.7,0.7),
+                     expand = c(0,0)) +
+  
+  ## lines in regression
+  scale_color_manual(values = c("#99C794", # Elite
+                                "#6699CC" # Exotic
+  )) +
+  
+  scale_fill_manual(values = c("#99C794", # Elite
+                               "#6699CC" # Exotic
+  )) +
+
+  # identify and insert names in graph; hjust change the position
+  geom_text(aes(label = Genotype), hjust=0.6, vjust=1.3, size=4) +
+
+theme(legend.position="none", #bottom
+      legend.title=element_text(size=13,color="black"),
+      legend.text=element_text(size=12,color="black"),
+      axis.text=element_text(color="black",size=14),
+      axis.title=element_text(size=14,color="black",face="bold"), #axis size 
+      strip.text= element_text(size = 14, colour = "black", face ="bold"),
+      axis.text.x = element_text(angle = 90, size=14,vjust=0.01),
+      panel.border = element_rect(linetype = "solid", size = 1, fill = NA, colour = "black"), ##all panel
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.background = element_blank(),
+      axis.ticks = element_line(size = 1, colour = "black"),
+      axis.ticks.length = unit(0.2, "cm")
+) 
+
+
+```
+
+
+## Fst analysis - exome data
+
+```{r Fst, echo=T}
+
+# Get sample id
+sample.id <- read.gdsn(index.gdsn(genofile, "sample.id"))
+
+#Pop group
+Pop=read.table("Pop_group.txt", h=T)
+pop_code=Pop$Group
+
+flag <- pop_code %in% c("Elite", "Exotic")
+samp.sel <- sample.id[flag]
+pop.sel <- pop_code[flag]
+Fst=snpgdsFst(genofile, 
+          sample.id=samp.sel, 
+          population=as.factor(pop.sel),
+          method="W&C84")
+Fst$Fst #Fst value
+
+```
+
+## Neighbor-joining tree (NJT) - Euclidean distance 
+
+```{r NJT, echo=T}
+
+load("all.data_scenarioA.RData")
+
+x <- new("genlight", M) # conversion
+x = as.matrix(x, parallel=FALSE)
+
+tre <- nj(dist(as.matrix(x)))  #method =  "euclidean"
+
+group1=read.table("group.txt", header=T)
+group1$Color=as.character(group1$Color)
+plot(tre, typ="fan", cex=0.7, show.tip=T)
+plot(tre, typ="fan", show.tip=F)
+tiplabels(pch=20, col=group1$Color, cex=4)
+
+
+```
+
+
+## Discriminant analysis of principal components (DAPCs) - 35K SNP Chip
+
+```{r DAPC_35K, echo=T}
+load("Snps_35K.RData")
+x <- new("genlight", M_35K) # conversion
+x=as.matrix(x, parallel=FALSE)
+
+group=read.table("grp_35K.txt", h=T)
+group=factor(group$Group)
+
+set.seed(5)
+
+##### DAPC model
+dapc1 <- dapc(x, group, parallel=FALSE, 
+              n.pca=100, 
+              n.da=1)
+
+#### Plot - Scatter DAPC
+myCol=c("#99C794","#6699CC")
+scatter(dapc1, grp=dapc1$grp, posi.da="bottomright", bg="white",
+        pch=17:22, 
+        cstar=1,  #line to connect dots
+        col=myCol, 
+        scree.pca=T,
+        solid=.9, #intensity of dot`s colour`
+        cell=1.5, 
+        cex=1.5, #size of dots
+        posi.pca="topright", leg=T, 
+        posi.leg="topleft",
+        #posi.da="topleft",
+        scree.da=T)
+
+```
+
+## DAPC - Exome-capture data
+
+```{r DAPC_exome, echo=T}
+
+load("all.data_scenarioA.RData")
+
+x <- new("genlight", M) # conversion
+x = as.matrix(x, parallel=FALSE)
+
+group=read.table("Pop_group.txt", header=T)
+group=factor(group$Group)
+
+##### DAPC
+set.seed(5)
+dapc1 <- dapc(x, group, parallel=FALSE, 
+              n.pca=50, 
+              n.da=1)
+
+## SNP contributions
+loadingplot(dapc1$var.contr,thres=0.01)
+
+#################
+#### Scatter DAPC
+#################
+myCol=c("#99C794","#6699CC")
+
+scatter(dapc1, grp=dapc1$grp, posi.da="bottomright", bg="white",
+        pch=17:22, 
+        cstar=1,  #line to connect dots
+        col=myCol, 
+        scree.pca=T,
+        solid=.9, #intensity of dot`s colour`
+        cell=1.5, 
+        cex=1.5, #size of dots
+        posi.pca="topright", leg=T, 
+        posi.leg="topleft",
+        #posi.da="topleft",
+        scree.da=T)
+
+```
+
+
+## Polymorphic information content (PIC) and minor allele frequency (MAF) using the popgen function
+
+```{r PIC, echo=T}
+
+load("all.data_scenarioA.RData")
+
+gen_par=popgen(M)
+##snps info
+snps_info=gen_par$whole$Markers
+snps_info$gene=map_genes1$Gene_ID
+## genotype info
+genotype_info=gen_par$whole$Genotypes
+##pop info
+pop_info=gen_par$whole$Population
+
+#### Extract the mean per genes
+melted <- melt(snps_info, id.vars=c("gene"))
+
+stats_gene=ddply(melted, c("gene", "variable"), summarise,
+                 mean = mean(value), sd = sd(value),
+                 sem = sd(value)/sqrt(length(value)))
+stats_gene[1:10,]
+
+```
+
+## Linkage disequilibrium (LD) block - subpopulations
+
+```{r LD_group, echo=T}
+
+load("MAP_Group.RData")
+load("M_ElitevsExotic.RData")
+
+M_ELITE=as.matrix(M_ELITE)
+M_EXOTIC=as.matrix(M_EXOTIC)
+
+#Elite
+gdat<-as(M_ELITE,"SnpMatrix")
+MyHeatmap <- LDheatmap(gdat, 
+                       genetic.distances = MAP_ELITE$Pos, #map are the same for both elite and exotic
+                       color = heat.colors(20),   #grey.colors(20)  heat.colors(20)
+                       flip=TRUE) #color="blueToRed"
+
+# Exotic
+gdat<-as(M_EXOTIC,"SnpMatrix")
+
+MyHeatmap <- LDheatmap(gdat, 
+                       genetic.distances = MAP_EXOTIC$Pos, #map are the same for both elite and exotic
+                       color = heat.colors(20),   #grey.colors(20)
+                       flip=TRUE) #color="blueToRed"
+
+
+
+```
+
+
+
+
+
