@@ -18,7 +18,7 @@ We provided the exome-capture data set as well as the R scripts used in this stu
      - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/variant_filtering/Variant-filtering.html)
 
 2. **Inference of population structure and genetic differentiation - PLINK / SNPRelate R**
-     - [html output]
+     - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/PS/Diversity-analysis.html)
 
 3. **Single point scan - GAPIT R**
      - [html output](http://htmlpreview.github.io/?https://github.com/DaniloLyra/exome_HiBAP_data/blob/master/single-scan/Single-variant-analysis.html)
