@@ -1,6 +1,6 @@
 # **Gene-based mapping of trehalose biosynthetic pathway genes reveals association with source- and sink-related yield traits in a spring wheat panel**
 
-### Danilo H. Lyra<sup>1</sup> , Amy Watson<sup>2</sup>, Cara A. Griffiths<sup>2</sup>, Ryan Joynson<sup>3</sup>, Gemma Molero<sup>4</sup>, Alina Igna<sup>2</sup>, Keywan Hassani-Pak<sup>1</sup>, Matthew P. Reynolds<sup>4</sup>, Anthony Hall<sup>3</sup>, and Matthew J. Paul<sup>2</sup>
+### Danilo H. Lyra<sup>1</sup>, Cara A. Griffiths<sup>2</sup>, Amy Watson<sup>2</sup>, Ryan Joynson<sup>3</sup>, Gemma Molero<sup>4</sup>, Alina Igna<sup>2</sup>, Keywan Hassani-Pak<sup>1</sup>, Matthew P. Reynolds<sup>4</sup>, Anthony Hall<sup>3</sup>, and Matthew J. Paul<sup>2</sup>
 
 <sup>1</sup>Department of Computational & Analytical Sciences, Rothamsted Research, Harpenden AL5 2JQ, UK
 <sup>2</sup>Department of Plant Sciences, Rothamsted Research, Harpenden AL5 2JQ, UK
